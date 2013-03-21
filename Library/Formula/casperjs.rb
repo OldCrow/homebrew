@@ -2,8 +2,8 @@ require 'formula'
 
 class Casperjs < Formula
   homepage 'http://www.casperjs.org/'
-  url 'https://github.com/n1k0/casperjs/zipball/1.0.0'
-  sha1 '354fecde094f72523f26f7032b65f3aae7013eba'
+  url 'https://github.com/n1k0/casperjs/tarball/1.0.2'
+  sha1 '292fd7bc406f1a509b05781b3eccb21008517984'
 
   head 'https://github.com/n1k0/casperjs.git'
 

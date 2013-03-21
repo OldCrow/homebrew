@@ -1,26 +1,26 @@
 require 'formula'
 
 class GitManuals < Formula
-  url 'http://git-core.googlecode.com/files/git-manpages-1.8.1.1.tar.gz'
-  sha1 '5089613a434ba09c94f6694d546c246838377760'
+  url 'http://git-core.googlecode.com/files/git-manpages-1.8.2.tar.gz'
+  sha1 'a10083a2a1fe6b35919fd6765f25dec18f4fa752'
 end
 
 class GitHtmldocs < Formula
-  url 'http://git-core.googlecode.com/files/git-htmldocs-1.8.1.1.tar.gz'
-  sha1 '952e0950d40bb141357be88a63f4cbb58258a4f5'
+  url 'http://git-core.googlecode.com/files/git-htmldocs-1.8.2.tar.gz'
+  sha1 'db1ca968f492f7ad1d4e0c13d07f23c745d10b74'
 end
 
 class Git < Formula
   homepage 'http://git-scm.com'
-  url 'http://git-core.googlecode.com/files/git-1.8.1.1.tar.gz'
-  sha1 '44b90aab937b0e0dbb0661eb5ec4ca6182e60854'
+  url 'http://git-core.googlecode.com/files/git-1.8.2.tar.gz'
+  sha1 '42960ec7c2d8404af3d3f6d21f32f1e97e6e0a96'
 
   head 'https://github.com/git/git.git'
 
-  depends_on 'pcre' if build.include? 'with-pcre'
-
   option 'with-blk-sha1', 'Compile with the block-optimized SHA1 implementation'
-  option 'with-pcre', 'Compile with the PCRE library'
+  option 'without-completions', 'Disable bash/zsh completions from "contrib" directory'
+
+  depends_on 'pcre' => :optional
 
   def install
     # If these things are installed, tell Git build system to not use them
@@ -35,9 +35,9 @@ class Git < Formula
     # Clean XCode 4.x installs don't include Perl MakeMaker
     ENV['NO_PERL_MAKEMAKER'] = '1' if MacOS.version >= :lion
 
-    ENV['BLK_SHA1'] = '1' if build.include? 'with-blk-sha1'
+    ENV['BLK_SHA1'] = '1' if build.with? 'blk-sha1'
 
-    if build.include? 'with-pcre'
+    if build.with? 'pcre'
       ENV['USE_LIBPCRE'] = '1'
       ENV['LIBPCREDIR'] = HOMEBREW_PREFIX
     end
@@ -65,9 +65,15 @@ class Git < Formula
       bin.install 'git-subtree'
     end
 
-    # install the completion script first because it is inside 'contrib'
-    (prefix+'etc/bash_completion.d').install 'contrib/completion/git-completion.bash'
-    (prefix+'etc/bash_completion.d').install 'contrib/completion/git-prompt.sh'
+    unless build.without? 'completions'
+      # install the completion script first because it is inside 'contrib'
+      bash_completion.install 'contrib/completion/git-completion.bash'
+      bash_completion.install 'contrib/completion/git-prompt.sh'
+
+      zsh_completion.install 'contrib/completion/git-completion.zsh' => '_git'
+      cp "#{bash_completion}/git-completion.bash", zsh_completion
+    end
+
     (share+'git-core').install 'contrib'
 
     # We could build the manpages ourselves, but the build process depends
